@@ -34,8 +34,8 @@ public class TwentyFortyEight extends ApplicationAdapter {
         Gdx.input.setInputProcessor(inputs);
 
         board[0][3].value = 3;
-        board[2][3].value = 3;
-        board[3][3].value = 3;
+        board[2][2].value = 3;
+        board[3][1].value = 3;
 
         //signSlide(1, 0);
 	}
@@ -45,6 +45,14 @@ public class TwentyFortyEight extends ApplicationAdapter {
     public void signSlide (int xinc, int yinc) {
         yinc *= -1;
         int base = -1;
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+                board[x][y].freedom = 0;
+                board[x][y].combine = false;
+            }
+        }
+
+
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
                 base = board[x][y].value;
@@ -76,8 +84,8 @@ public class TwentyFortyEight extends ApplicationAdapter {
                                     System.out.println("    TwentyFortyEight.signSlide: but it didn't");
                                 }
                             }
-                        } catch (ArrayIndexOutOfBoundsException ack) {
-                            break iOffLoop;
+                        } catch (ArrayIndexOutOfBoundsException ack) { //there are no more tiles to tell that I am not empty
+                            break iOffLoop; //stop looking for new tiles to tell where there are none
                         }
                     }
                 }
@@ -93,11 +101,14 @@ public class TwentyFortyEight extends ApplicationAdapter {
         NumberTile.xinc = xinc;
         NumberTile.yinc = yinc;
 
-        for (int x = 0; x < 4; x++) {
-            for (int y = 0; y < 4; y++) {
-                board[x][y].value += (board[x][y].combine? 1 : 0);
-            }
-        }
+        NumberTile.animate();
+
+
+        try { Thread.sleep((int) (NumberTile.slideDuration * 1000)); } catch (InterruptedException e) { }
+
+
+
+
 
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
@@ -105,11 +116,11 @@ public class TwentyFortyEight extends ApplicationAdapter {
             }
         }
 
+
+
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
-
-                    board[x + (board[x][y].freedom * -xinc)][y + (board[x][y].freedom * -yinc)].nextValue = board[x][y].value;
-
+                board[x + (board[x][y].freedom * -xinc)][y + (board[x][y].freedom * -yinc)].nextValue = (board[x][y].value + (board[x][y].combine? 1 : 0));
             }
         }
 
@@ -121,14 +132,28 @@ public class TwentyFortyEight extends ApplicationAdapter {
 
         board[3][3].value = 2;
 
+        textRender();
 
+
+    }
+
+    public void textRender() {
+        System.out.println("/------------------------\\");
+        for (int y = 3; y >= 0; y--) {
+            System.out.print("[");
+            for (int x = 0; x < 4; x++) {
+                System.out.print(" ." + board[x][y].value + ". ");
+            }
+            System.out.println("]");
+        }
+        System.out.println("\\------------------------/");
     }
 
 	@Override
 	public void render () {
+        NumberTile.timePasses(Gdx.graphics.getDeltaTime());
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         for (int x = 0; x < 4; x++) {
@@ -141,4 +166,8 @@ public class TwentyFortyEight extends ApplicationAdapter {
         }
 		batch.end();
 	}
+
+
+
+
 }

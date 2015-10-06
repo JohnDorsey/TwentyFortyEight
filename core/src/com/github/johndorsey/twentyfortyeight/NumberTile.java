@@ -16,6 +16,7 @@ public class NumberTile {
     public static int xinc, yinc;
     public int nextValue;
     public static float slideTimer;
+    public static float slideDuration;
 
     public static void setUpTextures() {
         numberTextures = new Texture[13];
@@ -36,26 +37,48 @@ public class NumberTile {
         freedom = 0;
         combine = false;
         slideTimer = 0;
+        slideDuration = 0.2f;
     }
 
     public void shoutStatus() {
         if (value == 0) {
             System.out.println(x + ", " + y +" is empty");
         } else {
-            System.out.println(x + ", " + y +" is a " + value + " tile... it has " + freedom + " square" + (freedom == 1? "" : "s") + " of freedom and will " + (combine? "" : "NOT") + " combine.");
+            System.out.println(x + ", " + y +" is a " + value + " tile... it has " + freedom + " square" + (freedom == 1? "" : "s") + " of freedom and will" + (combine? "" : " NOT ") + "combine.");
         }
     }
 
     public int getScreenX() {
-        return x * 64;
+        return (int)(weightedMean((float) x, (float) (x + (-xinc * freedom)), usedProgress())  * 64);
     }
 
     public int getScreenY() {
-        return y * 64;
+        //return y * 64;
+        return (int)(weightedMean((float) y, (float) (y + (-yinc * freedom)), usedProgress())  * 64);
     }
 
     public Texture getTexture() {
         return numberTextures[value];
+    }
+
+    public static void animate() {
+        slideTimer = slideDuration;
+    }
+
+    public static void timePasses(float time) {
+        slideTimer = Math.max(0.0f, slideTimer - time);
+    }
+
+    public static boolean animating() {
+        return (slideTimer != 0.0f);
+    }
+
+    public static float weightedMean(float start, float end, float progress) {
+        return (end * progress) + (start * (1 - progress));
+    }
+
+    public static float usedProgress() {
+        return (((slideTimer > 0)? (slideDuration - slideTimer) : 0) / slideDuration);
     }
 
     //public void doFrame() {
