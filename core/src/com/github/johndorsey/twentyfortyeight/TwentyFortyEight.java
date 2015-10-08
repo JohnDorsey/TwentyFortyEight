@@ -33,9 +33,12 @@ public class TwentyFortyEight extends ApplicationAdapter {
         inputs = new InputManage(this);
         Gdx.input.setInputProcessor(inputs);
 
-        board[0][3].value = 3;
-        board[2][2].value = 3;
-        board[3][1].value = 3;
+        board[0][0].value = 1;
+        board[0][1].value = 2;
+        board[0][2].value = 3;
+        board[1][0].value = 4;
+        board[1][1].value = 5;
+        board[2][0].value = 6;
 
         //signSlide(1, 0);
 	}
@@ -60,8 +63,10 @@ public class TwentyFortyEight extends ApplicationAdapter {
                     iOffLoop:
                     for (int iOff = 1; iOff < 4; iOff++) { //for all tiles in this direction
                         try { //until the edge of the board is reached
-                            board[x + (iOff * xinc)][y + (iOff * yinc)].freedom++;
-                            System.out.println("TwentyFortEight.signSlide: " + x + ", " + y + " is value 0 so the freedom of " + (x + (iOff * xinc)) + ", " + (y + (iOff * yinc)) + " has been set to " + board[x + (iOff * xinc)][y + (iOff * yinc)].freedom);
+                            //if (board[x + (iOff * xinc)][y + (iOff * yinc)].value != 0) { //don't tell an empty tile it can move!
+                                board[x + (iOff * xinc)][y + (iOff * yinc)].freedom++;
+                                System.out.println("TwentyFortEight.signSlide: " + x + ", " + y + " is value 0 so the freedom of " + (x + (iOff * xinc)) + ", " + (y + (iOff * yinc)) + " has been set to " + board[x + (iOff * xinc)][y + (iOff * yinc)].freedom);
+                            //}
                         } catch (ArrayIndexOutOfBoundsException ack) {
                             break iOffLoop;
                         }
@@ -94,6 +99,12 @@ public class TwentyFortyEight extends ApplicationAdapter {
 
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
+                if (board[x][y].value ==0) { board[x][y].freedom = 0; } //empty tiles can't move!
+            }
+        }
+
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
                 board[x][y].shoutStatus();
             }
         }
@@ -116,13 +127,32 @@ public class TwentyFortyEight extends ApplicationAdapter {
             }
         }
 
+        textRender("value");
+        textRender("willCombine");
+        textRender("nextValue");
+        textRender("freedom");
 
+        System.out.println("running code to change next value");
 
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
-                board[x + (board[x][y].freedom * -xinc)][y + (board[x][y].freedom * -yinc)].nextValue = (board[x][y].value + (board[x][y].combine? 1 : 0));
+                if (board[x][y].freedom != 0 && board[x][y].value != 0) {
+                    board[x + (board[x][y].freedom * -xinc)][y + (board[x][y].freedom * -yinc)].nextValue = ( /*((board[x][y].freedom > 0)?*/ board[x][y].value /* : board[x][y].nextValue)*/ + (board[x][y].combine ? 1 : 0));
+                } //else if (!board[x][y].combine) { board[x][y].nextValue = board[x][y].value; }
+                System.out.println("because tile " + x + ", " + y + " has freedom:" + board[x][y].freedom + " value:" + board[x][y].value + ", it'll move to " + (x + (board[x][y].freedom * -xinc)) + ", " + (y + (board[x][y].freedom * -yinc)) + " whose value's " + board[x + (board[x][y].freedom * -xinc)][y + (board[x][y].freedom * -yinc)].value + ". it " + (board[x][y].combine? "will" : "will NOT") + " combine with that tile.");
             }
         }
+
+        //for (int x = 0; x < 4; x++) {
+        //    for (int y = 0; y < 4; y++) {
+        //        if (board[x][y].freedom == 0 && board[x][y].value != 0 && !board[x][y].combine) { board[x][y].nextValue = 0 + board[x][y].value; }
+        //    }
+        //}
+
+        textRender("value");
+        textRender("willCombine");
+        textRender("nextValue");
+        System.out.println("running...");
 
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
@@ -130,19 +160,19 @@ public class TwentyFortyEight extends ApplicationAdapter {
             }
         }
 
-        board[3][3].value = 2;
+        //board[3][3].value = 2;
 
-        textRender();
+        textRender("value");
 
 
     }
 
-    public void textRender() {
-        System.out.println("/------------------------\\");
+    public void textRender(String dat) {
+        System.out.println("/------------------------\\" + dat);
         for (int y = 3; y >= 0; y--) {
             System.out.print("[");
             for (int x = 0; x < 4; x++) {
-                System.out.print(" ." + board[x][y].value + ". ");
+                System.out.print(" ." + ((dat=="value")? board[x][y].value : ((dat=="nextValue")? board[x][y].nextValue : ((dat=="freedom")? board[x][y].freedom : ((board[x][y].combine? "#" : " "))))) + ". ");
             }
             System.out.println("]");
         }
