@@ -9,14 +9,22 @@ import java.awt.*;
  */
 public class NumberTile {
     //public Rectangle thisTile;
+    public static int tileXSpacing = 64;
+    public static int tileYSpacing = 64;
+    public static float tileWidth = 60;
+    public static float tileHeight = 60;
+
     public static Texture[] numberTextures;
+    public static int xinc, yinc;
+    public static float slideTimer;
+    public static float slideDuration;
+    public static TwentyFortyEight parentGame;
+    public static boolean active;
     public boolean combine;
     public int value, freedom;
     public int x, y;
-    public static int xinc, yinc;
     public int nextValue;
-    public static float slideTimer;
-    public static float slideDuration;
+    public boolean added;
 
     public static void setUpTextures() {
         numberTextures = new Texture[13];
@@ -37,7 +45,8 @@ public class NumberTile {
         freedom = 0;
         combine = false;
         slideTimer = 0;
-        slideDuration = 0.2f;
+        slideDuration = 0.07f;
+        active = false;
     }
 
     public void shoutStatus() {
@@ -48,25 +57,71 @@ public class NumberTile {
         }
     }
 
+
+
     public int getScreenX() {
-        return (int)(weightedMean((float) x, (float) (x + (-xinc * freedom)), usedProgress())  * 64);
+        return (int)(weightedMean((float) x, (float) (x + (-xinc * freedom)), usedProgress())  * tileXSpacing)/* + getSizeAdjust()*/;
     }
 
     public int getScreenY() {
         //return y * 64;
-        return (int)(weightedMean((float) y, (float) (y + (-yinc * freedom)), usedProgress())  * 64);
+        return (int)(weightedMean((float) y, (float) (y + (-yinc * freedom)), usedProgress())  * tileYSpacing)/* + getSizeAdjust()*/;
+    }
+
+    public int getScreenWidth() {
+        //return (int) (added? weightedMean(0, tileWidth, usedProgress()) : tileWidth);
+        return (int) tileWidth;
+    }
+
+    public int getScreenHeight() {
+        //return (int) (added? weightedMean(0, tileHeight, usedProgress()) : tileHeight);
+        return (int) tileHeight;
+    }
+
+    public int getSizeAdjust() {
+        return (int) (added? weightedMean((tileWidth / 2), 0, usedProgress()) : 0);
     }
 
     public Texture getTexture() {
+        //if (usedProgress() == 1) { value = nextValue; }
         return numberTextures[value];
     }
 
     public static void animate() {
+        active = true;
         slideTimer = slideDuration;
+        //System.out.println("NumberTile.animate: set slideTimer to " + slideDuration);
     }
 
     public static void timePasses(float time) {
         slideTimer = Math.max(0.0f, slideTimer - time);
+        //if (slideTimer !=0) { System.out.println("NumberTile.timePasses: animated frame, taking " + parentGame.ft); }
+        if (slideTimer == 0 && active) {
+            animationEnd();
+        }
+    }
+
+    public static void animationEnd() {
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+                parentGame.board[x][y].value = parentGame.board[x][y].nextValue;
+            }
+        }
+        clearSlideData();
+        active = false;
+    }
+
+    public static void clearSlideData() {
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 4; y++) {
+                parentGame.board[x][y].nextValue = 0;
+                parentGame.board[x][y].freedom = 0;
+                parentGame.board[x][y].added = false;
+            }
+        }
+        parentGame.newOne.nextValue = 0;
+        parentGame.newOne.x = 4;
+        parentGame.newOne.y = 4;
     }
 
     public static boolean animating() {
