@@ -22,6 +22,9 @@ public class TwentyFortyEight extends ApplicationAdapter {
     private BitmapFont font;
 
     NumberTile newOne;
+
+    public static boolean xvEnabled = false;
+    public static boolean yvEnabled = false;
 	
 	@Override
 	public void create () {
@@ -108,6 +111,8 @@ public class TwentyFortyEight extends ApplicationAdapter {
         boolean result = false;
         int base = -1;
 
+        xvset(xinc); yvset(yinc);
+
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
                 board[x][y].freedom = 0;
@@ -118,12 +123,12 @@ public class TwentyFortyEight extends ApplicationAdapter {
 
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
-                base = board[x][y].value;
+                base = board[xv(x)][yv(y)].value;
                 if (base == 0) { //tell other tiles they are free to move 1 square because I am empty
                     iOffLoop:
                     for (int iOff = 1; iOff < 4; iOff++) { //for all tiles in this direction
                         try { //until the edge of the board is reached
-                                board[x + (iOff * xinc)][y + (iOff * yinc)].freedom++;
+                                board[xv(x + (iOff * xinc))][yv(y + (iOff * yinc))].freedom++;
                                 //System.out.println("TwentyFortEight.signSlide: " + x + ", " + y + " is value 0 so the freedom of " + (x + (iOff * xinc)) + ", " + (y + (iOff * yinc)) + " has been set to " + board[x + (iOff * xinc)][y + (iOff * yinc)].freedom);
                             } catch (ArrayIndexOutOfBoundsException ack) {
                             break iOffLoop;
@@ -133,17 +138,17 @@ public class TwentyFortyEight extends ApplicationAdapter {
                     iOffLoop:
                     for (int iOff = 1; iOff < 4; iOff++) { //for all tiles in this direction
                         try { //until the edge of the array is reached
-                            if (board[x + (iOff * xinc)][y + (iOff * yinc)].value != board[x][y].value && board[x + (iOff * xinc)][y + (iOff * yinc)].value != 0) { break iOffLoop; }
+                            if (board[xv(x + (iOff * xinc))][yv(y + (iOff * yinc))].value != board[xv(x)][yv(y)].value && board[xv(x + (iOff * xinc))][yv(y + (iOff * yinc))].value != 0) { break iOffLoop; }
                             // ^^^ cancel loop before telling any tiles they can move because my nearest neighbor cannot combine with me and isn't empty
-                            if ((!board[x][y].combine) && (!board[x + (iOff * xinc)][y + (iOff * yinc)].combine)) { //if neither I nor my neighbor in question is marked for combination
-                                if (board[x + (iOff * xinc)][y + (iOff * yinc)].value == base) { //if I can combine with that neighbor
-                                    board[x][y].combine = true; //I will combine
-                                    board[x + (iOff * xinc)][y + (iOff * yinc)].combine = true; //my neighbor will combine
-                                    board[x + (iOff * xinc)][y + (iOff * yinc)].freedom++; //my neighbor's freedom increases
+                            if ((!board[xv(x)][yv(y)].combine) && (!board[xv(x + (iOff * xinc))][yv(y + (iOff * yinc))].combine)) { //if neither I nor my neighbor in question is marked for combination
+                                if (board[xv(x + (iOff * xinc))][yv(y + (iOff * yinc))].value == base) { //if I can combine with that neighbor
+                                    board[xv(x)][yv(y)].combine = true; //I will combine
+                                    board[xv(x + (iOff * xinc))][yv(y + (iOff * yinc))].combine = true; //my neighbor will combine
+                                    board[xv(x + (iOff * xinc))][yv(y + (iOff * yinc))].freedom++; //my neighbor's freedom increases
                                     //System.out.println("TwentyFortyEight.signSlide: " + x + ", " + y + "is value " + board[x][y].value + " so the freedom of combo " + (x + (iOff * xinc)) + ", " + (y + (iOff * yinc)) + " has been set to " + board[x + (iOff * xinc)][y + (iOff * yinc)].freedom);
                                     //System.out.println("    TwentyFortyEight.signSlide: trying to update the freedom of the tiles 1 and 2 sqaures farther from it, which may go out of bounds and end the loop");
-                                    board[x + ((iOff+1) * xinc)][y + ((iOff+1) * yinc)].freedom++; //and the tile 1 farther
-                                    board[x + ((iOff+2) * xinc)][y + ((iOff+2) * yinc)].freedom++; //and the tile 1 farther
+                                    board[xv(x + ((iOff+1) * xinc))][yv(y + ((iOff+1) * yinc))].freedom++; //and the tile 1 farther
+                                    board[xv(x + ((iOff+2) * xinc))][yv(y + ((iOff+2) * yinc))].freedom++; //and the tile 1 farther than that
                                     //System.out.println("    TwentyFortyEight.signSlide: but it didn't");
                                 }
                             }
@@ -174,8 +179,8 @@ public class TwentyFortyEight extends ApplicationAdapter {
 
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
-                if (board[x + (board[x][y].freedom * -xinc)][y + (board[x][y].freedom * -yinc)].nextValue == 0) {
-                    board[x + (board[x][y].freedom * -xinc)][y + (board[x][y].freedom * -yinc)].nextValue = ( /*((board[x][y].freedom > 0)?*/ board[x][y].value /* : board[x][y].nextValue)*/ + (board[x][y].combine ? 1 : 0));
+                if (board[xv(x + (board[xv(x)][yv(y)].freedom * -xinc))][yv(y + (board[xv(x)][yv(y)].freedom * -yinc))].nextValue == 0) {
+                    board[xv(x + (board[xv(x)][yv(y)].freedom * -xinc))][yv(y + (board[xv(x)][yv(y)].freedom * -yinc))].nextValue = ( /*((board[x][y].freedom > 0)?*/ board[x][y].value /* : board[x][y].nextValue)*/ + (board[x][y].combine ? 1 : 0));
                 }
                 //System.out.println("because tile " + x + ", " + y + " has freedom:" + board[x][y].freedom + " value:" + board[x][y].value + ", it'll move to " + (x + (board[x][y].freedom * -xinc)) + ", " + (y + (board[x][y].freedom * -yinc)) + " whose value's " + board[x + (board[x][y].freedom * -xinc)][y + (board[x][y].freedom * -yinc)].value + ". it " + (board[x][y].combine? "will" : "will NOT") + " combine with that tile.");
             }
@@ -192,7 +197,23 @@ public class TwentyFortyEight extends ApplicationAdapter {
 
     }
 
-    
+    public static int xv(int x) {
+        return  x;
+    }
+
+    public static void xvset(int xinc) {
+        xvEnabled = xinc == -1;
+    }
+
+    public static int yv(int y) {
+        return y;
+    }
+
+    public static void yvset(int yinc) {
+        yvEnabled = yinc == 1;
+    }
+
+
 
 
     public boolean addRandomTile() {
