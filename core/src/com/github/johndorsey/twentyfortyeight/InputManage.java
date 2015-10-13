@@ -22,6 +22,7 @@ public class InputManage implements InputProcessor {
             case Input.Keys.RIGHT: { parentGame.playerSlide(-1, 0); } break;
             case Input.Keys.UP: { parentGame.playerSlide(0, -1); } break;
             case Input.Keys.DOWN: { parentGame.playerSlide(0, 1); } break;
+            case Input.Keys.BACKSPACE: { System.out.println("Backspace"); parentGame.rotateBoard(); }
         }
         return false;
     }

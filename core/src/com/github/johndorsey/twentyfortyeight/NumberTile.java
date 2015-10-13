@@ -45,7 +45,7 @@ public class NumberTile {
         freedom = 0;
         combine = false;
         slideTimer = 0;
-        slideDuration = 0.07f;
+        slideDuration = 0.1f;
         active = false;
     }
 
@@ -109,6 +109,7 @@ public class NumberTile {
         }
         clearSlideData();
         active = false;
+        parentGame.checkLoss();
     }
 
     public static void clearSlideData() {
