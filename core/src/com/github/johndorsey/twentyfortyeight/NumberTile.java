@@ -33,6 +33,16 @@ public class NumberTile {
         }
     }
 
+    public static int displayForValue(int value) {
+        if (value == 0) { return 0; }
+        if (value == 1) { return 1; }
+        int displayed = 2;
+        for (int i = 1; i < value; i++) {
+            displayed *= 2;
+        }
+        return displayed;
+    }
+
     public NumberTile(int nX, int nY) {
         //thisTile = new Rectangle();
         //thisTile.x = (x = nX) * 64;
@@ -109,7 +119,7 @@ public class NumberTile {
         }
         clearSlideData();
         active = false;
-        parentGame.checkLoss();
+        parentGame.gameManager.checkDone();
     }
 
     public static void clearSlideData() {

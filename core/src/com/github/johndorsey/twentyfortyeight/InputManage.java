@@ -17,12 +17,19 @@ public class InputManage implements InputProcessor {
 
     public boolean keyDown (int keycode) {
         //System.out.println("InputManage: key down!");
-        switch (keycode) {
-            case Input.Keys.LEFT: { parentGame.playerSlide(1, 0); } break;
-            case Input.Keys.RIGHT: { parentGame.playerSlide(-1, 0); } break;
-            case Input.Keys.UP: { parentGame.playerSlide(0, -1); } break;
-            case Input.Keys.DOWN: { parentGame.playerSlide(0, 1); } break;
-            case Input.Keys.BACKSPACE: { System.out.println("Backspace"); parentGame.rotateBoard(); }
+        if (keycode == Input.Keys.BACKSPACE) { parentGame.gameManager.winDialogue.enabled = true; }
+        if (parentGame.gameManager.acceptingMoves) {
+            switch (keycode) {
+                case Input.Keys.LEFT: { parentGame.playerSlide(1, 0); } break;
+                case Input.Keys.RIGHT: { parentGame.playerSlide(-1, 0); } break;
+                case Input.Keys.UP: { parentGame.playerSlide(0, -1); } break;
+                case Input.Keys.DOWN: { parentGame.playerSlide(0, 1); } break;
+                //case Input.Keys.BACKSPACE: { System.out.println("Backspace"); parentGame.rotateBoard(); }
+            }
+        } else if (parentGame.gameManager.acceptingSelects) {
+            switch (keycode) {
+                case Input.Keys.LEFT: { parentGame.gameManager.select(-1); }
+            }
         }
         return false;
     }
