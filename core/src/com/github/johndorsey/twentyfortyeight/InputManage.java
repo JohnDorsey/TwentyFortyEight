@@ -17,7 +17,7 @@ public class InputManage implements InputProcessor {
 
     public boolean keyDown (int keycode) {
         //System.out.println("InputManage: key down!");
-        if (keycode == Input.Keys.BACKSPACE) { parentGame.gameManager.winDialogue.enabled = true; }
+        if (keycode == Input.Keys.BACKSPACE) { /*parentGame.addTile(10); parentGame.addTile(10); parentGame.addTile(10); parentGame.addTile(10);*/ }
         if (parentGame.gameManager.acceptingMoves) {
             switch (keycode) {
                 case Input.Keys.LEFT: { parentGame.playerSlide(1, 0); } break;
@@ -28,7 +28,9 @@ public class InputManage implements InputProcessor {
             }
         } else if (parentGame.gameManager.acceptingSelects) {
             switch (keycode) {
-                case Input.Keys.LEFT: { parentGame.gameManager.select(-1); }
+                case Input.Keys.LEFT: { parentGame.gameManager.select(-1); } break;
+                case Input.Keys.RIGHT: { parentGame.gameManager.select(1); } break;
+                case Input.Keys.ENTER: { parentGame.gameManager.enter(); } break;
             }
         }
         return false;

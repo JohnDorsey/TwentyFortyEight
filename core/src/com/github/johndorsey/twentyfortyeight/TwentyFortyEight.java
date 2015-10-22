@@ -11,6 +11,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import java.util.Random;
 
 public class TwentyFortyEight extends ApplicationAdapter {
+
+
+
 	SpriteBatch batch;
 	private OrthographicCamera camera;
     NumberTile[][] board;
@@ -27,9 +30,25 @@ public class TwentyFortyEight extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
+
+        NoReset.setup();
+
 		batch = new SpriteBatch();
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, 1080, 720);
+		camera.setToOrtho(false, 360, 360);
+
+        NumberTile.parentGame = this;
+        NumberTile.setUpTextures();
+
+        font = new BitmapFont();
+        font.setColor(Color.BLACK);
+
+        rnd = new Random();
+
+        newGame();
+	}
+
+    public void newGame() {
         board = new NumberTile[4][4];
         makeEmptyBoard();
         newOne = new NumberTile(4, 4);
@@ -37,30 +56,24 @@ public class TwentyFortyEight extends ApplicationAdapter {
 
         gameManager = new GameManager(this);
 
-
-        NumberTile.parentGame = this;
-        NumberTile.setUpTextures();
         inputs = new InputManage(this);
         Gdx.input.setInputProcessor(inputs);
-
-        font = new BitmapFont();
-        font.setColor(Color.BLACK);
-
-        rnd = new Random();
-
 
         addRandomTile();
         addRandomTile();
         NumberTile.xinc = 0;
         NumberTile.yinc = 0;
         NumberTile.animate();
-	}
+        //if (NoReset.openMenu) { GameManager}
+
+    }
 
     public void makeEmptyBoard() {
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
                 board[x][y] = new NumberTile(x, y);
                 board[x][y].value = 0;
+                board[x][y].nextValue = 0;
             }
         }
     }
@@ -208,6 +221,10 @@ public class TwentyFortyEight extends ApplicationAdapter {
     }
 
     public boolean addRandomTile() {
+        return addTile(rnd.nextDouble() > 0.5? 2 : 3);
+    }
+
+    public boolean addTile (int toAdd) {
         int emptyCount = 0;
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
@@ -221,7 +238,7 @@ public class TwentyFortyEight extends ApplicationAdapter {
             for (int y = 0; y < 4; y++) {
                 if (board[x][y].nextValue == 0) { toFill--; }
                 if (toFill == 0) {
-                    board[x][y].nextValue = rnd.nextDouble() > 0.5? 2 : 3; board[x][y].added = true;
+                    board[x][y].nextValue = toAdd; board[x][y].added = true;
                     newOne.added = true;
                     newOne.value = board[x][y].nextValue;
                     newOne.x = x; newOne.y = y;
@@ -233,6 +250,8 @@ public class TwentyFortyEight extends ApplicationAdapter {
         }
         return true;
     }
+
+
 
     public void textRender(String dat) {
         if (dat=="all") {
@@ -259,9 +278,11 @@ public class TwentyFortyEight extends ApplicationAdapter {
         batch.begin();
         //font.draw(batch, (int) (1.0f / ft) + " fps", 200, 200);
         //font.draw(batch, "score: " + gameManager.currentScore, 200, 200);
-        for (int x = 0; x < 4; x++) {
-            for (int y = 0; y < 4; y++) {
-                batch.draw(board[x][y].getTexture(), board[x][y].getScreenX(), board[x][y].getScreenY(), board[x][y].getScreenWidth(), board[x][y].getScreenHeight());
+        if (!NoReset.openMenu) {
+            for (int x = 0; x < 4; x++) {
+                for (int y = 0; y < 4; y++) {
+                    batch.draw(board[x][y].getTexture(), board[x][y].getScreenX(), board[x][y].getScreenY(), board[x][y].getScreenWidth(), board[x][y].getScreenHeight());
+                }
             }
         }
         batch.draw(newOne.getTexture(), newOne.getScreenX() + newOne.getSizeAdjust(), newOne.getScreenY() + newOne.getSizeAdjust(), NumberTile.weightedMean(0, NumberTile.tileWidth, NumberTile.usedProgress()), NumberTile.weightedMean(0, NumberTile.tileHeight, NumberTile.usedProgress()));
